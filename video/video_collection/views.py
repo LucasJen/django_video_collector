@@ -8,8 +8,8 @@ from .models import Video
 
 
 def home(request):
-    app_name = 'Video Upload Site'
-    return(render(request, 'video_collection/home.html', {app_name: 'app_name'}))
+    app_name = 'Exercise Videos'
+    return(render(request, 'video_collection/home.html', {'app_name': app_name}))
 
 def add(request):
 
@@ -21,13 +21,16 @@ def add(request):
                 return redirect('video_list')
                 # messages.info(request, 'New video saved!')
             except ValidationError: # User facing error
-                messages.warning(request, 'Invalid Youtube URL.')
+                messages.warning(request, 'Invalid YouTube URL')
             except IntegrityError: # User facing error if video is already added.
                 messages.warning(request, 'This video has already been added.')
 
          # if the form is not valid, it will returnt he same page with the user provided information still in the boxes
         messages.warning(request, 'Please check the data entered.')
-        return render(request, 'video_collection/add.html', {'new_video_form': new_video_form})         
+        return render(request, 'video_collection/video_list.html', {
+            'videos': Video.objects.order_by(Lower('name')),
+            'search_form': SearchForm()
+        })         
     
     new_video_form = VideoForm()
     return render(request, 'video_collection/add.html', {'new_video_form': new_video_form})

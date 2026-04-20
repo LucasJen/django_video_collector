@@ -10,20 +10,30 @@ class Video(models.Model):
     video_id = models.CharField(max_length=40, unique=True)
 
     def save(self, *args, **kwargs): #override save to be able to extract video id from url
-        
-        # Validates that the url is a youtube url
-        if not self.url.startswith('https://www.youtube.com/watch'):
-            raise ValidationError(f'Not a Youtube URL: {self.url}')
-        
+
+        # extract the video id from a youtube url
+
+        # if not self.url.startswith('https://www.youtube.com/watch'):
+        #     raise ValidationError(f'Not a YouTube URL {self.url}')
         url_components = parse.urlparse(self.url)
-        query_string = url_components.query # i.e  v=1235235
+
+        if url_components.scheme != 'https':
+            raise ValidationError(f'Not a YouTube URL {self.url}')
+
+        if url_components.netloc != 'www.youtube.com':
+            raise ValidationError(f'Not a YouTube URL {self.url}')
+
+        if url_components.path != '/watch':
+            raise ValidationError(f'Not a YouTube URL {self.url}')
+
+        query_string = url_components.query  # 'v=12345678'
         if not query_string:
-            raise ValidationError('Invalid YouTube URL {self.url}')
-        parameters = parse.parse_qs(query_string, strict_parsing=True) # sets up dictionary strict parsing ensure valid query string
-        v_parameters_list = parameters.get('v') # looks for dictionary "v" key
-        if not v_parameters_list: # Checking if None or empty list
-            raise ValidationError(f'Invalid Youtube URL, missing parameters {self.url}')
-        self.video_id = v_parameters_list[0] 
+            raise ValidationError(f'Invalid YouTube URL {self.url}')
+        parameters = parse.parse_qs(query_string, strict_parsing=True)  # dictionary
+        v_parameters_list = parameters.get('v')  # return None if no key found, e.g abc=1234&abc=12345678
+        if not v_parameters_list:  # checking if None or empty list
+            raise ValidationError(f'Invalid YouTube URL {self.url}')
+        self.video_id = v_parameters_list[0]
 
         super().save(*args, **kwargs)
 
