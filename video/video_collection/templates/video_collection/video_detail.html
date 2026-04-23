@@ -17,4 +17,9 @@
 
 <p><a href="{% url 'video_list' %}">Back to video list</a></p>
 
+<form method="POST" action="{% url 'delete_video' video.pk %}">
+    {% csrf_token %}
+    <button type="submit">Delete</button>
+</form>
+
 {% endblock %}

@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
@@ -35,8 +35,27 @@ def add(request):
     new_video_form = VideoForm()
     return render(request, 'video_collection/add.html', {'new_video_form': new_video_form})
 
-def video_list(request):
+def video_detail(request, video_pk):
+    """
+    Shows video details
+    """
+    video = get_object_or_404(Video, pk=video_pk)
+    return render(request, 'video_collection/video_detail.html', {'video': video})
 
+def delete_video(request, video_pk):
+    """
+    Deletes Selected video from database
+    """
+    video = get_object_or_404(Video, pk=video_pk)
+    if request.method == 'POST':
+        video.delete()
+        return redirect('video_list')
+    return redirect('video_detail', video_pk=video_pk)
+
+def video_list(request):
+    """
+    Used to search for videos that are stored in the database
+    """
     search_form = SearchForm(request.GET) # create form from data that the user provides
     if search_form.is_valid():
         search_term = search_form.cleaned_data['search_term']

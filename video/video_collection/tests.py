@@ -117,9 +117,24 @@ class TestVideoList(TestCase):
         self.assertContains(response, '2 videos')
 
 
+class TestVideoDetail(TestCase):
+
+    def test_video_detail_page_shows_all_video_info(self):
+        video = Video.objects.create(name='yoga', notes='yoga for neck', url='https://www.youtube.com/watch?v=4vTJHUDB5ak')
+        url = reverse('video_detail', kwargs={'video_pk': video.pk})
+        response = self.client.get(url)
+        self.assertContains(response, 'yoga')
+        self.assertContains(response, 'yoga for neck')
+        self.assertContains(response, 'https://www.youtube.com/watch?v=4vTJHUDB5ak')
+        self.assertContains(response, '4vTJHUDB5ak')
+
+    def test_video_detail_page_for_nonexistent_video_returns_404(self):
+        url = reverse('video_detail', kwargs={'video_pk': 999})
+        response = self.client.get(url)
+        self.assertEqual(404, response.status_code)
+
 class TestVideoSearch(TestCase):
     pass
-
 
 
 class TestVideoModel(TestCase):
